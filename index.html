@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#000000" />
   <title>Smart Trading AI — Commercial Trading Platform</title>
 
   <!-- FontAwesome Icons -->
@@ -34,23 +37,23 @@
     </a>
 
     <div class="badge-live" translate="no">
-      <div class="pulse-dot"></div> BINANCE LIVE REAL-TIME DATA
+      <div class="pulse-dot"></div> BINANCE LIVE
     </div>
 
     <div class="header-right">
       <!-- AI Model Selector -->
       <select id="modelSelect" class="st-select">
-        <option value="claude-3-5-sonnet">Claude 3.5 Sonnet (Claude Code AI)</option>
-        <option value="gemini-1-5-pro">Gemini 1.5 Pro (Multimodal Vision)</option>
-        <option value="gpt-4o">GPT-4o (Quantitative Analysis)</option>
+        <option value="claude-3-5-sonnet">Claude 3.5 Sonnet</option>
+        <option value="gemini-1-5-pro">Gemini 1.5 Pro</option>
+        <option value="gpt-4o">GPT-4o</option>
       </select>
 
       <button class="btn-glass" id="btnOpenSettings">
-        <i class="fa-solid fa-gear"></i> Commercial Settings
+        <i class="fa-solid fa-gear"></i> Настройки
       </button>
 
-      <!-- Navigation Tabs -->
-      <nav class="nav-tabs">
+      <!-- Desktop Navigation Tabs -->
+      <nav class="nav-tabs desktop-only">
         <button class="tab-btn active" data-view="analyzer">
           <i class="fa-solid fa-chart-candlestick"></i> AI Analyzer
         </button>
@@ -72,7 +75,7 @@
       <div class="tv-grid">
         
         <!-- Left Area: TradingView Live Interactive Chart -->
-        <div class="tv-chart-pane">
+        <div class="tv-chart-pane" id="paneChart">
           <!-- Chart Header Toolbar -->
           <div class="chart-toolbar">
             <div class="symbol-picker" translate="no">
@@ -103,7 +106,7 @@
         </div>
 
         <!-- Right Area: Sidebar AI Analysis & Real Data Signal -->
-        <div class="tv-sidebar-pane">
+        <div class="tv-sidebar-pane" id="paneSidebar">
           
           <!-- Live Symbol Price Box -->
           <div class="side-panel">
@@ -246,12 +249,32 @@
 
   </main>
 
+  <!-- MOBILE BOTTOM NAVIGATION BAR -->
+  <nav class="mobile-bottom-nav">
+    <button class="mob-nav-btn active" data-mobview="chart">
+      <i class="fa-solid fa-chart-line"></i>
+      <span>График</span>
+    </button>
+    <button class="mob-nav-btn" data-mobview="signals">
+      <i class="fa-solid fa-bolt"></i>
+      <span>ИИ Сигнал</span>
+    </button>
+    <button class="mob-nav-btn" data-mobview="calculator">
+      <i class="fa-solid fa-calculator"></i>
+      <span>Риски</span>
+    </button>
+    <button class="mob-nav-btn" data-mobview="journal">
+      <i class="fa-solid fa-book"></i>
+      <span>Журнал</span>
+    </button>
+  </nav>
+
   <!-- COMMERCIAL SETTINGS MODAL -->
   <div class="modal-overlay" id="settingsModal">
     <div class="modal-box">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+      <div style="display: flex; justify-content: space-between; align- items: center; margin-bottom: 18px;">
         <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0;">
-          <i class="fa-solid fa-sliders"></i> Commercial Settings & API Keys
+          <i class="fa-solid fa-sliders"></i> Настройки бота и ссылок
         </h3>
         <button id="btnCloseSettings" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem;">
           <i class="fa-solid fa-xmark"></i>
@@ -259,34 +282,28 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">Anthropic Claude API Key (Claude 3.5 Sonnet)</label>
-        <input type="password" id="keyClaude" class="form-input" placeholder="sk-ant-api..." />
+        <label class="form-label">Telegram Bot Token</label>
+        <input type="text" id="keyTgToken" class="form-input" value="8996408216:AAEpZdCf3Jp0Vwg4H929qa2U6f32XejprGI" />
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Telegram Channel / Chat ID (или юзернейм канала)</label>
+        <input type="text" id="keyTgChatId" class="form-input" placeholder="@my_vip_channel или -100123456789" />
       </div>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
         <div class="form-group">
           <label class="form-label">Bybit Referral Link</label>
-          <input type="text" id="keyBybitRef" class="form-input" placeholder="https://bybit.com/register?aff=YOUR_CODE" />
+          <input type="text" id="keyBybitRef" class="form-input" placeholder="https://bybit.com" />
         </div>
         <div class="form-group">
           <label class="form-label">Binance Referral Link</label>
-          <input type="text" id="keyBinanceRef" class="form-input" placeholder="https://binance.com/register?ref=YOUR_CODE" />
-        </div>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-        <div class="form-group">
-          <label class="form-label">Telegram Bot Token</label>
-          <input type="text" id="keyTgToken" class="form-input" placeholder="123456789:ABCDefgh..." />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Telegram Chat/Channel ID</label>
-          <input type="text" id="keyTgChatId" class="form-input" placeholder="-1001234567890" />
+          <input type="text" id="keyBinanceRef" class="form-input" placeholder="https://binance.com" />
         </div>
       </div>
 
       <button class="btn-analyze-full btn-white" style="margin-top: 14px;" id="btnSaveApiKeys">
-        <i class="fa-solid fa-floppy-disk"></i> Save Commercial Settings
+        <i class="fa-solid fa-floppy-disk"></i> Сохранить настройки
       </button>
     </div>
   </div>
@@ -296,23 +313,23 @@
     <div class="modal-box" style="text-align: center;">
       <div style="font-size: 2.5rem; margin-bottom: 10px;">👑</div>
       <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--text-white); margin-bottom: 8px;">
-        Daily Free AI Signal Limit Reached
+        Лимит бесплатных сигналов исчерпан
       </h3>
       <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
-        You've used all 3 free daily AI signals. Upgrade to <strong>Smart Trading VIP</strong> for unlimited signals, 1-click Telegram broadcasts, and high-probability SMC setups!
+        Вы использовали 3 бесплатных ИИ-сигнала. Оформите **VIP-подписку** для безлимитного доступа!
       </p>
 
       <a href="https://t.me/" target="_blank" class="btn-analyze-full btn-white" style="text-decoration: none; justify-content: center; margin-bottom: 12px;">
-        📱 Buy VIP Access via Telegram Manager ($29/mo)
+        📱 Купить VIP доступ в Telegram ($29/мес)
       </a>
 
       <div style="display: flex; gap: 8px; margin-top: 14px;">
-        <input type="text" id="vipPasscode" class="form-input" placeholder="Enter VIP Passcode (e.g. VIP777)" style="text-align: center;" />
-        <button class="btn-glass" id="btnUnlockVipCode" style="white-space: nowrap;">Unlock</button>
+        <input type="text" id="vipPasscode" class="form-input" placeholder="Введите промокод (например VIP777)" style="text-align: center;" />
+        <button class="btn-glass" id="btnUnlockVipCode" style="white-space: nowrap;">Разблокировать</button>
       </div>
 
       <button id="btnCloseVip" style="background: transparent; border: none; color: var(--text-dim); margin-top: 16px; cursor: pointer; font-size: 0.8rem;">
-        Close Window
+        Закрыть
       </button>
     </div>
   </div>
