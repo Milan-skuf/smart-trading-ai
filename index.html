@@ -8,6 +8,8 @@
   <meta name="theme-color" content="#000000" />
   <title>Smart Trading AI — Commercial Trading Platform</title>
 
+  <link rel="manifest" href="./manifest.json" />
+
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <!-- TradingView Official Widget Library -->
@@ -272,7 +274,7 @@
   <!-- COMMERCIAL SETTINGS MODAL -->
   <div class="modal-overlay" id="settingsModal">
     <div class="modal-box">
-      <div style="display: flex; justify-content: space-between; align- items: center; margin-bottom: 18px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
         <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0;">
           <i class="fa-solid fa-sliders"></i> Настройки бота и ссылок
         </h3>
@@ -287,9 +289,13 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">Telegram Channel / Chat ID (или юзернейм канала)</label>
+        <label class="form-label">Telegram Channel / Chat ID (например @my_vip_channel)</label>
         <input type="text" id="keyTgChatId" class="form-input" placeholder="@my_vip_channel или -100123456789" />
       </div>
+
+      <button class="btn-glass" id="btnTestTelegram" style="width: 100%; justify-content: center; margin-bottom: 14px; background: #0088cc; color: #ffffff; border: none;">
+        🧪 Проверить связь с Telegram ботом
+      </button>
 
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
         <div class="form-group">

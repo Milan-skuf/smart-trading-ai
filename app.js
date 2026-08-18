@@ -456,13 +456,13 @@ function renderSignalResult(res) {
   document.getElementById('btnPublishTelegram')?.addEventListener('click', () => publishToTelegramChannel(res.rawSignal));
 }
 
-// BULLETPROOF TELEGRAM BOT DISPATCHER (CORS Bypass & Multi-Fallback)
+// BULLETPROOF TELEGRAM BOT DISPATCHER WITH DIAGNOSTICS
 async function publishToTelegramChannel(sig) {
   const token = state.apiKeys.tgBotToken || '8996408216:AAEpZdCf3Jp0Vwg4H929qa2U6f32XejprGI';
-  let chatId = state.apiKeys.tgChatId;
+  let chatId = state.apiKeys.tgChatId || document.getElementById('keyTgChatId')?.value;
 
   if (!chatId) {
-    chatId = prompt('📱 Введите Username или ID вашего Telegram-канала (например @my_channel или имя пользователя):');
+    chatId = prompt('📱 Введите Username или ID вашего Telegram-канала (например @my_vip_channel):');
     if (!chatId) return;
     state.apiKeys.tgChatId = chatId;
     localStorage.setItem('st_tg_chat_id', chatId);
@@ -484,7 +484,6 @@ async function publishToTelegramChannel(sig) {
 <i>🤖 Smart Trading AI Engine (Claude 3.5 Sonnet)</i>
   `.trim();
 
-  // Method 1: Standard POST Fetch
   try {
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
@@ -497,28 +496,13 @@ async function publishToTelegramChannel(sig) {
     });
     const data = await res.json();
     if (data.ok) {
-      alert('✅ Сигнал успешно отправлен в Telegram!');
+      alert('✅ Сигнал успешно опубликован в вашем Telegram канале!');
       return;
+    } else {
+      alert(`⚠️ Ошибка Telegram: ${data.description}\n\nВАЖНО: Убедитесь, что вы добавили вашего бота в АДМИНИСТРАТОРЫ канала ${chatId}!`);
     }
   } catch (e) {
-    console.log('Fetch POST failed, activating CORS bypass fallback...', e);
-  }
-
-  // Method 2: GET Ping Fallback (Bypasses Browser CORS restrictions 100%)
-  try {
-    const encodedText = encodeURIComponent(messageText);
-    const imgPing = new Image();
-    imgPing.src = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${encodeURIComponent(chatId)}&text=${encodedText}&parse_mode=HTML&_t=${Date.now()}`;
-    
-    // Also trigger via beacon
-    if (navigator.sendBeacon) {
-      const beaconUrl = `https://api.telegram.org/bot${token}/sendMessage?chat_id=${encodeURIComponent(chatId)}&text=${encodedText}&parse_mode=HTML`;
-      navigator.sendBeacon(beaconUrl);
-    }
-
-    alert('✅ Запрос на отправку сигнала передан в Telegram!');
-  } catch (err) {
-    // Method 3: Direct Telegram Share Modal
+    console.log('Fetch POST failed, opening fallback share modal...', e);
     const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(messageText)}`;
     window.open(shareUrl, '_blank');
   }
@@ -593,10 +577,52 @@ function initSettingsModal() {
   const modal = document.getElementById('settingsModal');
   const closeBtn = document.getElementById('btnCloseSettings');
   const saveBtn = document.getElementById('btnSaveApiKeys');
+  const testTgBtn = document.getElementById('btnTestTelegram');
 
   if (!btn || !modal) return;
-  btn.addEventListener('click', () => modal.classList.add('active'));
+  btn.addEventListener('click', () => {
+    document.getElementById('keyTgToken').value = state.apiKeys.tgBotToken;
+    document.getElementById('keyTgChatId').value = state.apiKeys.tgChatId;
+    document.getElementById('keyBybitRef').value = state.apiKeys.bybitRef;
+    document.getElementById('keyBinanceRef').value = state.apiKeys.binanceRef;
+    modal.classList.add('active');
+  });
+
   closeBtn?.addEventListener('click', () => modal.classList.remove('active'));
+
+  testTgBtn?.addEventListener('click', async () => {
+    const token = document.getElementById('keyTgToken').value || state.apiKeys.tgBotToken;
+    const chatId = document.getElementById('keyTgChatId').value || state.apiKeys.tgChatId;
+
+    if (!chatId) {
+      alert('⚠️ Пожалуйста, введите Username канала (например @my_vip_channel) или ID чата!');
+      return;
+    }
+
+    testTgBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Проверяем связь...`;
+
+    try {
+      const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: '🤖 <b>Smart Trading AI Bot успешно подключен!</b>\n\nТеперь все ИИ-сигналы могут публиковаться в этот канал автоматически.',
+          parse_mode: 'HTML'
+        })
+      });
+      const data = await res.json();
+      if (data.ok) {
+        alert('🎉 УСПЕХ! Бот прислал тестовое сообщение в ваш Telegram канал!');
+      } else {
+        alert(`❌ Telegram ответил ошибкой: ${data.description}\n\n👉 РЕШЕНИЕ: Откройте ваш Telegram-канал -> Настройки -> Администраторы -> Добавьте вашего бота в админы!`);
+      }
+    } catch (e) {
+      alert('❌ Не удалось связаться с Telegram. Проверьте интернет-соединение.');
+    } finally {
+      testTgBtn.innerHTML = `🧪 Проверить связь с Telegram ботом`;
+    }
+  });
 
   saveBtn?.addEventListener('click', () => {
     state.apiKeys.bybitRef = document.getElementById('keyBybitRef')?.value || 'https://bybit.com';
