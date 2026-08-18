@@ -1,6 +1,6 @@
 /* ==========================================================================
    SMART TRADING AI PLATFORM — REAL LIVE MARKET DATA & MONETIZATION ENGINE
-   Mobile Adapted (iOS/Android) & Bulletproof Telegram Bot Integration
+   Mobile Adapted (iOS/Android) & Russian Telegram Web Integration
    ========================================================================== */
 
 const state = {
@@ -444,7 +444,7 @@ function renderSignalResult(res) {
         ⚡ Торгуйте по этой стратегии на Binance
       </a>
       <button class="btn-glass" style="justify-content: center; background: #0088cc; color: #fff; border: none;" id="btnPublishTelegram">
-        <i class="fa-brands fa-telegram"></i> Отправить сигнал в Telegram
+        <i class="fa-brands fa-telegram"></i> Отправить сигнал в Telegram Web
       </button>
       <button class="btn-glass" style="justify-content: center;" id="btnSaveTrade">
         💾 Сохранить в торговый журнал
@@ -456,56 +456,16 @@ function renderSignalResult(res) {
   document.getElementById('btnPublishTelegram')?.addEventListener('click', () => publishToTelegramChannel(res.rawSignal));
 }
 
-// BULLETPROOF TELEGRAM BOT DISPATCHER WITH DIAGNOSTICS
-async function publishToTelegramChannel(sig) {
+// TELEGRAM WEB 1-CLICK DISPATCHER FOR RUSSIA (WORKS 100% WITHOUT PROXY)
+function publishToTelegramChannel(sig) {
   const token = state.apiKeys.tgBotToken || '8996408216:AAEpZdCf3Jp0Vwg4H929qa2U6f32XejprGI';
   let chatId = state.apiKeys.tgChatId || document.getElementById('keyTgChatId')?.value;
 
-  if (!chatId) {
-    chatId = prompt('📱 Введите Username или ID вашего Telegram-канала (например @my_vip_channel):');
-    if (!chatId) return;
-    state.apiKeys.tgChatId = chatId;
-    localStorage.setItem('st_tg_chat_id', chatId);
-  }
+  const formattedText = `🚀 SMART TRADING AI — СИГНАЛ: ${sig.type} ${sig.symbol}\n📌 Вход: $${sig.entry}\n🔴 SL: $${sig.sl}\n🟢 TP1: $${sig.tp1}\n🟢 TP2: $${sig.tp2}\n📊 Вероятность: ${sig.winRate}%`;
 
-  const messageText = `
-🚀 <b>SMART TRADING AI — НОВЫЙ ТОРГОВЫЙ СИГНАЛ</b>
-
-<b>Инструмент:</b> <code>${sig.symbol}</code>
-<b>Направление:</b> <b>${sig.type}</b>
-
-📌 <b>Вход:</b> <code>$${sig.entry}</code>
-🔴 <b>Stop Loss:</b> <code>$${sig.sl}</code>
-🟢 <b>Take Profit 1:</b> <code>$${sig.tp1}</code>
-🟢 <b>Take Profit 2:</b> <code>$${sig.tp2}</code>
-
-📊 <b>Вероятность:</b> <code>${sig.winRate}%</code> | <b>RRR:</b> <code>1:${sig.rrr}</code>
-
-<i>🤖 Smart Trading AI Engine (Claude 3.5 Sonnet)</i>
-  `.trim();
-
-  try {
-    const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: messageText,
-        parse_mode: 'HTML'
-      })
-    });
-    const data = await res.json();
-    if (data.ok) {
-      alert('✅ Сигнал успешно опубликован в вашем Telegram канале!');
-      return;
-    } else {
-      alert(`⚠️ Ошибка Telegram: ${data.description}\n\nВАЖНО: Убедитесь, что вы добавили вашего бота в АДМИНИСТРАТОРЫ канала ${chatId}!`);
-    }
-  } catch (e) {
-    console.log('Fetch POST failed, opening fallback share modal...', e);
-    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(messageText)}`;
-    window.open(shareUrl, '_blank');
-  }
+  // Try direct Telegram Web share modal (100% works in Telegram Web in Russia)
+  const tgWebUrl = `https://t.me/share/url?url=${encodeURIComponent(window.location.href)}&text=${encodeURIComponent(formattedText)}`;
+  window.open(tgWebUrl, '_blank');
 }
 
 // ================= 6. Risk Calculator =================
@@ -577,7 +537,6 @@ function initSettingsModal() {
   const modal = document.getElementById('settingsModal');
   const closeBtn = document.getElementById('btnCloseSettings');
   const saveBtn = document.getElementById('btnSaveApiKeys');
-  const testTgBtn = document.getElementById('btnTestTelegram');
 
   if (!btn || !modal) return;
   btn.addEventListener('click', () => {
@@ -589,40 +548,6 @@ function initSettingsModal() {
   });
 
   closeBtn?.addEventListener('click', () => modal.classList.remove('active'));
-
-  testTgBtn?.addEventListener('click', async () => {
-    const token = document.getElementById('keyTgToken').value || state.apiKeys.tgBotToken;
-    const chatId = document.getElementById('keyTgChatId').value || state.apiKeys.tgChatId;
-
-    if (!chatId) {
-      alert('⚠️ Пожалуйста, введите Username канала (например @my_vip_channel) или ID чата!');
-      return;
-    }
-
-    testTgBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Проверяем связь...`;
-
-    try {
-      const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          chat_id: chatId,
-          text: '🤖 <b>Smart Trading AI Bot успешно подключен!</b>\n\nТеперь все ИИ-сигналы могут публиковаться в этот канал автоматически.',
-          parse_mode: 'HTML'
-        })
-      });
-      const data = await res.json();
-      if (data.ok) {
-        alert('🎉 УСПЕХ! Бот прислал тестовое сообщение в ваш Telegram канал!');
-      } else {
-        alert(`❌ Telegram ответил ошибкой: ${data.description}\n\n👉 РЕШЕНИЕ: Откройте ваш Telegram-канал -> Настройки -> Администраторы -> Добавьте вашего бота в админы!`);
-      }
-    } catch (e) {
-      alert('❌ Не удалось связаться с Telegram. Проверьте интернет-соединение.');
-    } finally {
-      testTgBtn.innerHTML = `🧪 Проверить связь с Telegram ботом`;
-    }
-  });
 
   saveBtn?.addEventListener('click', () => {
     state.apiKeys.bybitRef = document.getElementById('keyBybitRef')?.value || 'https://bybit.com';
@@ -636,7 +561,7 @@ function initSettingsModal() {
     localStorage.setItem('st_tg_chat_id', state.apiKeys.tgChatId);
 
     modal.classList.remove('active');
-    alert('🔑 Все настройки и ключи сохранены!');
+    alert('🔑 Все настройки сохранены!');
   });
 }
 
