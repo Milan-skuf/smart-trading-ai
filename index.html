@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Trading AI — Commercial Trading Platform</title>
+
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- TradingView Official Widget Library -->
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+
+  <!-- Top Real-Time WebSocket Ticker Tape -->
+  <div class="ticker-tape-container" translate="no">
+    <div class="ticker-tape-track" id="tickerTapeTrack" translate="no">
+      <!-- Populated live via Binance WebSocket -->
+    </div>
+  </div>
+
+  <!-- Header Navbar -->
+  <header class="header">
+    <a href="#" class="brand">
+      <div class="brand-logo">
+        <i class="fa-solid fa-chart-line"></i>
+      </div>
+      <div>
+        <span class="brand-name">SMART TRADING AI</span>
+        <span class="brand-tag">COMMERCIAL v3.5</span>
+      </div>
+    </a>
+
+    <div class="badge-live" translate="no">
+      <div class="pulse-dot"></div> BINANCE LIVE REAL-TIME DATA
+    </div>
+
+    <div class="header-right">
+      <!-- AI Model Selector -->
+      <select id="modelSelect" class="st-select">
+        <option value="claude-3-5-sonnet">Claude 3.5 Sonnet (Claude Code AI)</option>
+        <option value="gemini-1-5-pro">Gemini 1.5 Pro (Multimodal Vision)</option>
+        <option value="gpt-4o">GPT-4o (Quantitative Analysis)</option>
+      </select>
+
+      <button class="btn-glass" id="btnOpenSettings">
+        <i class="fa-solid fa-gear"></i> Commercial Settings
+      </button>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs">
+        <button class="tab-btn active" data-view="analyzer">
+          <i class="fa-solid fa-chart-candlestick"></i> AI Analyzer
+        </button>
+        <button class="tab-btn" data-view="calculator">
+          <i class="fa-solid fa-calculator"></i> Risk & Size
+        </button>
+        <button class="tab-btn" data-view="journal">
+          <i class="fa-solid fa-book-bookmark"></i> Trade Journal
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Layout -->
+  <main class="app-content">
+
+    <!-- VIEW 1: TRADINGVIEW CHART & SIDEBAR ANALYZER -->
+    <section class="view-section active" id="view-analyzer">
+      <div class="tv-grid">
+        
+        <!-- Left Area: TradingView Live Interactive Chart -->
+        <div class="tv-chart-pane">
+          <!-- Chart Header Toolbar -->
+          <div class="chart-toolbar">
+            <div class="symbol-picker" translate="no">
+              <i class="fa-solid fa-coins"></i>
+              <select id="symbolSelect" class="st-select" style="font-weight: 700; border: none; background: transparent;">
+                <option value="BTCUSDT">BTC / USDT (Bitcoin)</option>
+                <option value="ETHUSDT">ETH / USDT (Ethereum)</option>
+                <option value="SOLUSDT">SOL / USDT (Solana)</option>
+                <option value="BNBUSDT">BNB / USDT (Binance Coin)</option>
+                <option value="XRPUSDT">XRP / USDT (Ripple)</option>
+                <option value="DOGEUSDT">DOGE / USDT (Dogecoin)</option>
+              </select>
+            </div>
+
+            <div class="timeframe-btns">
+              <button class="tf-btn" data-tf="1m">1m</button>
+              <button class="tf-btn" data-tf="5m">5m</button>
+              <button class="tf-btn active" data-tf="15m">15m</button>
+              <button class="tf-btn" data-tf="1h">1h</button>
+              <button class="tf-btn" data-tf="4h">4h</button>
+            </div>
+          </div>
+
+          <!-- TradingView Widget Container -->
+          <div class="chart-widget-wrapper" id="tradingview_widget_container">
+            <!-- Widget initialized in app.js -->
+          </div>
+        </div>
+
+        <!-- Right Area: Sidebar AI Analysis & Real Data Signal -->
+        <div class="tv-sidebar-pane">
+          
+          <!-- Live Symbol Price Box -->
+          <div class="side-panel">
+            <div class="panel-title">
+              <i class="fa-solid fa-chart-simple"></i> Real Binance Market Feed
+            </div>
+            
+            <div class="live-price-box" translate="no">
+              <div>
+                <div style="font-size: 0.78rem; color: var(--text-muted);" id="currentSymbolName">BTCUSDT</div>
+                <div class="live-price-val" id="livePriceVal">Streaming...</div>
+              </div>
+              <div class="live-price-change" id="livePriceChange">0.00%</div>
+            </div>
+
+            <!-- Strategy Form -->
+            <div class="form-group">
+              <label class="form-label">Trading Strategy</label>
+              <select id="strategy" class="form-select">
+                <option value="smc" selected>Smart Money Concepts (SMC / ICT)</option>
+                <option value="priceaction">Price Action & Pattern Breakout</option>
+                <option value="indicators">Indicators (RSI / SMA Confluence)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Trading Style</label>
+              <select id="tradingStyle" class="form-select">
+                <option value="scalping">Scalping (M1 - M15)</option>
+                <option value="intraday" selected>Intraday (M15 - H1)</option>
+                <option value="swing">Swing Trading (H4 - D1)</option>
+              </select>
+            </div>
+
+            <button class="btn-analyze-full btn-white" id="btnAnalyze">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Generate AI Signal (Claude 3.5 Sonnet)
+            </button>
+          </div>
+
+          <!-- Signal Output Panel -->
+          <div class="side-panel" style="flex: 1;">
+            <div class="panel-title">
+              <i class="fa-solid fa-robot"></i> Real Market AI Trade Setup
+            </div>
+
+            <div id="signalOutput">
+              <div style="text-align: center; padding: 40px 10px; color: var(--text-muted);">
+                <i class="fa-solid fa-brain" style="font-size: 2.8rem; color: var(--text-white); margin-bottom: 12px; opacity: 0.7;"></i>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Click <strong>"Generate AI Signal"</strong> to analyze live Binance candlesticks and order blocks.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- VIEW 2: RISK & POSITION CALCULATOR -->
+    <section class="view-section" id="view-calculator">
+      <div class="full-panel">
+        <div class="card-panel">
+          <h2 class="panel-title" style="font-size: 1.1rem; margin-bottom: 18px;">
+            <i class="fa-solid fa-calculator"></i> Position Size & Risk Calculator
+          </h2>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+            <div>
+              <div class="form-group">
+                <label class="form-label">Account Balance ($ USD)</label>
+                <input type="number" id="calcBalance" class="form-input" value="10000" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Risk Percentage per Trade (%)</label>
+                <input type="number" id="calcRisk" class="form-input" value="1.0" step="0.1" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Entry Price ($)</label>
+                <input type="number" id="calcEntry" class="form-input" value="64000" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">Stop Loss Price ($)</label>
+                <input type="number" id="calcSL" class="form-input" value="63000" />
+              </div>
+
+              <button class="btn-analyze-full btn-white" style="margin-top: 14px;" id="btnCalculate">
+                <i class="fa-solid fa-calculator"></i> Calculate Position Size
+              </button>
+            </div>
+
+            <div style="background: #000000; border: 1px solid var(--border-subtle); border-radius: 6px; padding: 24px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center;">
+              <div style="font-size: 0.85rem; color: var(--text-muted);">Recommended Position Size</div>
+              <div style="font-family: var(--font-mono); font-size: 3rem; font-weight: 800; color: var(--text-white); margin: 10px 0;" id="resUnits" translate="no">1.0000</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Crypto / Lot Units</div>
+
+              <div style="display: flex; gap: 16px; margin-top: 20px; width: 100%;">
+                <div style="flex: 1; background: var(--bg-panel); padding: 12px; border-radius: 4px; border: 1px solid var(--border-subtle);">
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Max Risk Amount</div>
+                  <div style="font-family: var(--font-mono); font-size: 1.15rem; font-weight: 700; color: var(--signal-red);" id="resRiskUsd" translate="no">$100.00</div>
+                </div>
+                <div style="flex: 1; background: var(--bg-panel); padding: 12px; border-radius: 4px; border: 1px solid var(--border-subtle);">
+                  <div style="font-size: 0.75rem; color: var(--text-muted);">Total Position Value</div>
+                  <div style="font-family: var(--font-mono); font-size: 1.15rem; font-weight: 700; color: var(--text-white);" id="resPositionUsd" translate="no">$64,000.00</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: TRADE JOURNAL -->
+    <section class="view-section" id="view-journal">
+      <div class="full-panel">
+        <div class="card-panel">
+          <h2 class="panel-title" style="font-size: 1.1rem; margin-bottom: 18px;">
+            <i class="fa-solid fa-book-bookmark"></i> Trade Journal & Saved AI Signals
+          </h2>
+
+          <div style="overflow-x: auto;">
+            <table class="journal-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Symbol</th>
+                  <th>Type</th>
+                  <th>Entry</th>
+                  <th>Stop Loss</th>
+                  <th>Take Profit</th>
+                </tr>
+              </thead>
+              <tbody id="journalBody" translate="no">
+                <!-- Populated in app.js -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- COMMERCIAL SETTINGS MODAL -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0;">
+          <i class="fa-solid fa-sliders"></i> Commercial Settings & API Keys
+        </h3>
+        <button id="btnCloseSettings" style="background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.2rem;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Anthropic Claude API Key (Claude 3.5 Sonnet)</label>
+        <input type="password" id="keyClaude" class="form-input" placeholder="sk-ant-api..." />
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label class="form-label">Bybit Referral Link</label>
+          <input type="text" id="keyBybitRef" class="form-input" placeholder="https://bybit.com/register?aff=YOUR_CODE" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Binance Referral Link</label>
+          <input type="text" id="keyBinanceRef" class="form-input" placeholder="https://binance.com/register?ref=YOUR_CODE" />
+        </div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label class="form-label">Telegram Bot Token</label>
+          <input type="text" id="keyTgToken" class="form-input" placeholder="123456789:ABCDefgh..." />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Telegram Chat/Channel ID</label>
+          <input type="text" id="keyTgChatId" class="form-input" placeholder="-1001234567890" />
+        </div>
+      </div>
+
+      <button class="btn-analyze-full btn-white" style="margin-top: 14px;" id="btnSaveApiKeys">
+        <i class="fa-solid fa-floppy-disk"></i> Save Commercial Settings
+      </button>
+    </div>
+  </div>
+
+  <!-- VIP PAYWALL MODAL -->
+  <div class="modal-overlay" id="vipModal">
+    <div class="modal-box" style="text-align: center;">
+      <div style="font-size: 2.5rem; margin-bottom: 10px;">👑</div>
+      <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--text-white); margin-bottom: 8px;">
+        Daily Free AI Signal Limit Reached
+      </h3>
+      <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">
+        You've used all 3 free daily AI signals. Upgrade to <strong>Smart Trading VIP</strong> for unlimited signals, 1-click Telegram broadcasts, and high-probability SMC setups!
+      </p>
+
+      <a href="https://t.me/" target="_blank" class="btn-analyze-full btn-white" style="text-decoration: none; justify-content: center; margin-bottom: 12px;">
+        📱 Buy VIP Access via Telegram Manager ($29/mo)
+      </a>
+
+      <div style="display: flex; gap: 8px; margin-top: 14px;">
+        <input type="text" id="vipPasscode" class="form-input" placeholder="Enter VIP Passcode (e.g. VIP777)" style="text-align: center;" />
+        <button class="btn-glass" id="btnUnlockVipCode" style="white-space: nowrap;">Unlock</button>
+      </div>
+
+      <button id="btnCloseVip" style="background: transparent; border: none; color: var(--text-dim); margin-top: 16px; cursor: pointer; font-size: 0.8rem;">
+        Close Window
+      </button>
+    </div>
+  </div>
+
+  <!-- Application Logic -->
+  <script src="./app.js"></script>
+</body>
+</html>
